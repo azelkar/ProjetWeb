@@ -156,7 +156,7 @@ const lobby = new Game(lobbies.length,new Rules(10,wordBase,5));
 lobbies.push(lobby);
 
 
-// importer le module socket.io
+
 const io = require('socket.io')()
 
 
@@ -177,20 +177,19 @@ io.on('connection', (client) => {
 	});
 
 	client.on('guess-word', (guessedword) => {
-		client.lobby.compareAnswer(guessedword, client.username);
 		if(client.username != client.lobby.drawer.name){
-			if (guessedword == client.lobby.selectedword){
-			  simpleAlert('You-guessed-right',null,client.lobby.playerGetByName(client.username));
-			  if (client.lobby.checkWin()){
-				client.lobby.drawerReward();
-				newTurn (lobby);
-			  }
+			if (guessedword == client.lobby.selectedword && !client.lobby.playerGetByName(client.username).guessedRight){
+				client.lobby.compareAnswer(guessedword, client.username);
+				simpleAlert('You-guessed-right',null,client.lobby.playerGetByName(client.username));
+				alertAll('add-messages', {text: client.username + ':' + ' a trouvé'}, client.lobby.players);
+				if (client.lobby.checkWin()){
+					client.lobby.drawerReward();
+					newTurn (lobby);
+				}
 			}
 			else {
 			  alertAll('add-messages', {text: client.username + ':' + guessedword + ' is false'}, client.lobby.players);
 			}
-		}else{
-			simpleAlert('add-messages', 'tricheur',client.lobby.drawer);
 		}
 	});
 	
@@ -201,7 +200,6 @@ io.on('connection', (client) => {
 	});
 
 	client.on('stroke', (e) => {
-		console.log(client.username);
 		if (client.username == client.lobby.drawer.name){
 			alertAll('stroke', e, client.lobby.players);
 		}
@@ -212,11 +210,13 @@ io.on('connection', (client) => {
 		}
 	});
 	client.on('start', () => {
-		client.lobby.setFirstDrawer(client.lobby.players[0]);
-		//alertAll ('New-drawer',client.lobby.drawer.name, client.lobby.players);
-		client.lobby.setWordChoices();
-		const choices = {0:lobby.wordchoice[0],1:lobby.wordchoice[1],2:lobby.wordchoice[2]}
-		simpleAlert('Choose-a-word',choices,lobby.drawer);
+		if(client.lobby.players.length > 2){
+			client.lobby.setFirstDrawer(client.lobby.players[0]);
+			//alertAll ('New-drawer',client.lobby.drawer.name, client.lobby.players);
+			client.lobby.setWordChoices();
+			const choices = {0:lobby.wordchoice[0],1:lobby.wordchoice[1],2:lobby.wordchoice[2]}
+			simpleAlert('Choose-a-word',choices,lobby.drawer);
+		}
 	});
 
 	client.on('choosen-word', (word) => {
@@ -255,10 +255,11 @@ io.on('connection', (client) => {
   
 });
 function newTurn (lobby){
-  alertAll ('end-of-turn', null,lobby.players);
-  alertAll ('update-players', lobby.getPlayers(), lobby.players);
-  clearInterval (lobby.timer);
-  lobby.nextDrawer();
+	alertAll('clear', null, lobby.players);
+	alertAll ('end-of-turn', null,lobby.players);
+	alertAll ('update-players', lobby.getPlayers(), lobby.players);
+	clearInterval (lobby.timer);
+	lobby.nextDrawer();
 }
 function Timer (lobby){
   lobby.timer -= 1;
