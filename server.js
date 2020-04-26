@@ -152,7 +152,7 @@ class Game {
 
 
 const lobbies = []
-const lobby = new Game(lobbies.length,new Rules(10,wordBase,5));
+const lobby = new Game(lobbies.length,new Rules(60,wordBase,5));
 lobbies.push(lobby);
 
 
