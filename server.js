@@ -210,7 +210,7 @@ io.on('connection', (client) => {
 		}
 	});
 	client.on('start', () => {
-		if(client.lobby.players.length > 2){
+		if(client.lobby.players.length >= 2){
 			client.lobby.setFirstDrawer(client.lobby.players[0]);
 			//alertAll ('New-drawer',client.lobby.drawer.name, client.lobby.players);
 			client.lobby.setWordChoices();
