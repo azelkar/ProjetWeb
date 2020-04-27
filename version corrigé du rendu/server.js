@@ -199,7 +199,7 @@ io.on('connection', (client) => {
 	});
 
 	client.on('guess-word', (guessedword) => {
-		if(client.lobby.drawer !== undefined){
+		if(client.lobby !== undefined){
 			if(client.username != client.lobby.drawer.name){
 				if (guessedword == client.lobby.selectedword && !client.lobby.playerGetByName(client.username).guessedRight){
 					client.lobby.compareAnswer(guessedword, client.username);
@@ -216,7 +216,7 @@ io.on('connection', (client) => {
 	});
 	
 	client.on('dragging-update', (dragging) => {
-		if(client.lobby.drawer !== undefined){
+		if(client.lobby !== undefined){
 			if (client.username == client.lobby.drawer.name){
 				alertAll('dragging-update', dragging, client.lobby.players);
 			}
@@ -224,14 +224,14 @@ io.on('connection', (client) => {
 	});
 
 	client.on('stroke', (e) => {
-		if(client.lobby.drawer !== undefined){
+		if(client.lobby !== undefined){
 			if (client.username == client.lobby.drawer.name){
 				alertAll('stroke', e, client.lobby.players);
 			}
 		}
 	});
 	client.on('clear', (e) => {
-		if(client.lobby.drawer !== undefined){
+		if(client.lobby !== undefined){
 			if (client.username == client.lobby.drawer.name){
 				alertAll('clear', null, client.lobby.players);
 			}
@@ -295,9 +295,10 @@ function newTurn (lobby){
 		alertAll('add-messages', {text: lobby.drawer.name +' est le dessinateur'}, lobby.players);
 		alertAll('add-messages', {text: lobby.drawer.name +' choisit un mot (les trois boutons sous le canvas)'}, lobby.players);
 	}else{
-		lobby.drawer = null;
+		lobby.drawer = new Player;
 		alertAll('add-messages', {text: 'Fin de la partie, appuyer sur start pour recommencer'}, lobby.players);
 		lobby.reset();
+		alertAll ('update-players', lobby.getPlayers(), lobby.players);
 	}
 }
 function Timer (lobby){
