@@ -1,0 +1,8 @@
+#main > li {
+  display: inline-block;
+  padding: 20px;
+}
+
+.message > li{
+  list-style-type: none;
+}
